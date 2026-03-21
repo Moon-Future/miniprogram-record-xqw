@@ -1,0 +1,37 @@
+<!--pages/detail/index.wxml-->
+<view class="container">
+  <!-- 客人信息头部 -->
+  <view class="header">
+    <view class="guest-name">{{guest.name}}</view>
+    <view class="guest-summary">
+      <view class="summary-item">
+        <text class="summary-label">历史累计</text>
+        <text class="summary-value">{{guest.totalCount}}</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-label">已发奖励</text>
+        <text class="summary-value reward">{{guest.rewardCount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="record-list">
+    <view wx:for="{{recordList}}" wx:key="index" class="record-item {{item.type === 'reward' ? 'reward' : ''}}">
+      <view class="record-icon">
+        <text wx:if="{{item.type === 'visit'}}">👋</text>
+        <text wx:if="{{item.type === 'reward'}}">🎁</text>
+      </view>
+      <view class="record-content">
+        <view class="record-title">
+          {{item.type === 'visit' ? '光临' : '发放奖励'}}
+        </view>
+        <view class="record-time">{{item.timeStr}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{recordList.length === 0}}" class="empty-tip">
+      暂无记录
+    </view>
+  </view>
+</view>

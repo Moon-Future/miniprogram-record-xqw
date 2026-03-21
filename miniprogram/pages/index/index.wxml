@@ -1,29 +1,126 @@
 <!--index.wxml-->
 <view class="container">
-  <view class="title">快速了解云开发</view>
-  <view class="top_tip">免鉴权接口调用 免部署后台 高并发</view>
-  <view class="power" wx:key="title" wx:for="{{powerList}}" wx:for-item="power">
-    <view class="power_info" data-index="{{index}}" data-type="{{ power.type }}" bindtap="onClickPowerInfo">
-      <view class="power_info_text">
-        <view class="power_info_text_title">
-          {{power.title}}
-          <view class="power_info_text_tag" wx:if="{{power.tag}}">{{power.tag}}</view>
-        </view>
-        <view class="power_info_text_tip">{{power.tip}}</view>
-      </view>
-      <image wx:if="{{!power.showItem && power.item.length}}" class="power_info_more" src="../../images/arrow.svg"></image>
-      <image wx:if="{{power.showItem && power.item.length}}" class="power_info_less" src="../../images/arrow.svg"></image>
-      <image wx:if="{{!power.item.length}}" class="power_item_icon" src="../../images/arrow.svg"></image>
-    </view>
-    <view wx:if="{{power.showItem}}">
-      <view wx:key="title" wx:for="{{power.item}}">
-        <view class="line"></view>
-        <view class="power_item" bindtap="jumpPage" data-type="{{ item.type }}" data-page="{{item.page}}">
-          <view class="power_item_title">{{item.title}}</view>
-          <image class="power_item_icon" src="../../images/arrow.svg"></image>
-        </view>
+  <!-- 搜索框 -->
+  <view class="search-wrapper">
+    <view class="search-box">
+      <input class="search-input" placeholder="搜索客人姓名" value="{{searchKeyword}}" bindinput="onSearchInput" />
+      <view wx:if="{{searchKeyword}}" class="search-clear" bindtap="clearSearch">
+        <text>×</text>
       </view>
     </view>
   </view>
-  <cloud-tip-modal showTipProps="{{showTip}}" title="{{title}}" content="{{content}}"></cloud-tip-modal>
+
+  <!-- 客人列表 -->
+  <view class="guest-list">
+    <view wx:if="{{guestList.length === 0}}" class="empty-tip">
+      暂无客人，点击下方按钮添加
+    </view>
+
+    <view wx:for="{{guestList}}" wx:key="_id" class="guest-item" bindtap="showGuestActions" data-guest="{{item}}">
+      <view class="guest-left">
+        <view class="guest-name">
+          {{item.name}}
+          <view wx:if="{{item.currentCount >= 10}}" class="reward-tag">待发奖</view>
+        </view>
+        <view class="guest-stats">
+          <view class="stat-item">
+            <text class="stat-label">历史</text>
+            <text class="stat-value">{{item.totalCount}}</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-label">奖励</text>
+            <text class="stat-value reward">{{item.rewardCount}}</text>
+          </view>
+        </view>
+        <view wx:if="{{item.visitHistory && item.visitHistory.length > 0}}" class="last-visit">
+          上次：{{item.visitHistory[0].timeStr}}
+        </view>
+      </view>
+      <view class="guest-right">
+        <view class="current-count-big">
+          <text class="current-num">{{item.currentCount}}</text>
+          <text class="current-label">/10</text>
+        </view>
+        <image class="arrow" src="../../images/arrow.svg"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加客人按钮 -->
+  <view class="add-btn-wrapper">
+    <view class="add-btn" bindtap="showAddModal">
+      <text class="add-icon">+</text>
+      <text>添加客人</text>
+    </view>
+  </view>
+
+  <!-- 添加客人弹窗 -->
+  <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-title">添加新客人</view>
+      <input class="modal-input" placeholder="请输入客人姓名" value="{{newGuestName}}" bindinput="onNameInput" />
+      <view class="modal-buttons">
+        <button class="modal-btn cancel" bindtap="hideAddModal">取消</button>
+        <button class="modal-btn confirm" bindtap="addGuest">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 客人操作弹窗 -->
+  <view wx:if="{{showActions}}" class="modal-mask" bindtap="hideGuestActions">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-title">{{selectedGuest.name}}</view>
+      <view class="action-buttons">
+        <button class="action-btn add-count" bindtap="incrementCount">
+          <text class="action-icon">👋</text>
+          <text>光临次数 +1</text>
+        </button>
+        <button class="action-btn minus-count {{selectedGuest.currentCount <= 0 ? 'disabled' : ''}}" bindtap="decrementCount">
+          <text class="action-icon">↩️</text>
+          <text>光临次数 -1</text>
+        </button>
+        <button class="action-btn give-reward {{selectedGuest.currentCount < 10 ? 'disabled' : ''}}" bindtap="giveReward">
+          <text class="action-icon">🎁</text>
+          <text>发放奖励</text>
+        </button>
+      </view>
+      <view class="current-stats">
+        <view class="stat-row">
+          <text>本次光临：</text>
+          <text class="highlight">{{selectedGuest.currentCount}}/10</text>
+        </view>
+        <view class="stat-row">
+          <text>历史累计：</text>
+          <text>{{selectedGuest.totalCount}}次</text>
+        </view>
+        <view class="stat-row">
+          <text>已发奖励：</text>
+          <text>{{selectedGuest.rewardCount}}次</text>
+        </view>
+      </view>
+
+      <!-- 查看详情按钮 -->
+      <button class="detail-btn" bindtap="goToDetail">查看完整记录</button>
+
+      <!-- 修改姓名按钮 -->
+      <button class="detail-btn" bindtap="showEditNameModal">修改姓名</button>
+
+      <!-- 删除按钮 -->
+      <button class="delete-btn" bindtap="deleteGuest">删除客人</button>
+
+      <button class="close-btn" bindtap="hideGuestActions">关闭</button>
+    </view>
+  </view>
+
+  <!-- 修改姓名弹窗 -->
+  <view wx:if="{{showEditName}}" class="modal-mask" bindtap="hideEditNameModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-title">修改客人姓名</view>
+      <input class="modal-input" placeholder="请输入新的客人姓名" value="{{editName}}" bindinput="onEditNameInput" />
+      <view class="modal-buttons">
+        <button class="modal-btn cancel" bindtap="hideEditNameModal">取消</button>
+        <button class="modal-btn confirm" bindtap="saveEditName">确定</button>
+      </view>
+    </view>
+  </view>
 </view>
