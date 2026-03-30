@@ -141,6 +141,20 @@ Page({
     });
   },
 
+  // 删除云存储文件
+  async deleteCloudFile(fileID) {
+    if (!fileID) return;
+    try {
+      await wx.cloud.deleteFile({
+        fileList: [fileID],
+      });
+      console.log("旧头像删除成功", fileID);
+    } catch (e) {
+      console.error("删除旧头像失败", e);
+      // 删除失败不阻止后续操作
+    }
+  },
+
   // 上传图片到云存储
   async uploadImage(filePath) {
     const timestamp = Date.now();
@@ -383,6 +397,11 @@ Page({
           try {
             wx.showLoading({ title: "删除中..." });
             const db = app.db;
+            // 先删除头像文件
+            if (guest.avatarUrl) {
+              await this.deleteCloudFile(guest.avatarUrl);
+            }
+            // 再标记客人为已删除
             await db.collection(DB_NAME).doc(guest._id).update({
               data: {
                 deleted: true,

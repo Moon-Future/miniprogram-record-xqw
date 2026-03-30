@@ -108,6 +108,20 @@ Page({
     });
   },
 
+  // 删除云存储文件
+  async deleteCloudFile(fileID) {
+    if (!fileID) return;
+    try {
+      await wx.cloud.deleteFile({
+        fileList: [fileID],
+      });
+      console.log("旧头像删除成功", fileID);
+    } catch (e) {
+      console.error("删除旧头像失败", e);
+      // 删除失败不阻止后续操作
+    }
+  },
+
   // 上传图片到云存储
   async uploadImage(filePath) {
     const timestamp = Date.now();
@@ -151,7 +165,13 @@ Page({
       let avatarUrl = this.data.avatarUrl;
       if (this.data.tempAvatarPath) {
         this.setData({ uploading: true });
-        avatarUrl = await this.uploadImage(this.data.tempAvatarPath);
+        // 先上传新头像
+        const newAvatarUrl = await this.uploadImage(this.data.tempAvatarPath);
+        // 上传成功后删除旧头像
+        if (this.data.avatarUrl) {
+          await this.deleteCloudFile(this.data.avatarUrl);
+        }
+        avatarUrl = newAvatarUrl;
       }
 
       // 检查是否有重名（排除自己）
