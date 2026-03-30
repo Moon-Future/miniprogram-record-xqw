@@ -14,11 +14,18 @@ Page({
     adding: false,
   },
 
+  isPreviewingAvatar: false,
+
   onLoad() {
     this.loadGuests();
   },
 
   onShow() {
+    // 如果只是预览头像，不重新加载
+    if (this.isPreviewingAvatar) {
+      this.isPreviewingAvatar = false;
+      return;
+    }
     this.loadGuests();
   },
 
@@ -107,11 +114,29 @@ Page({
           sourceType: sourceType,
           success: (chooseRes) => {
             const tempFilePath = chooseRes.tempFilePaths[0];
-            this.setData({
-              tempAddAvatarPath: tempFilePath,
+            // 裁剪成正方形
+            this.cropImage(tempFilePath, (croppedPath) => {
+              this.setData({
+                tempAddAvatarPath: croppedPath,
+              });
             });
           },
         });
+      },
+    });
+  },
+
+  // 裁剪图片为正方形
+  cropImage(filePath, callback) {
+    wx.cropImage({
+      src: filePath,
+      cropScale: "1:1",
+      success: (res) => {
+        callback(res.tempFilePath);
+      },
+      fail: (err) => {
+        console.log("裁剪失败，使用原图", err);
+        callback(filePath);
       },
     });
   },
@@ -261,6 +286,7 @@ Page({
   // 跳转到详情页
   goToDetail() {
     const guest = this.data.selectedGuest;
+    this.isPreviewingAvatar = false; // 详情页回来需要刷新
     wx.navigateTo({
       url: `/pages/detail/index?id=${guest._id}`,
     });
@@ -270,10 +296,24 @@ Page({
   // 跳转到编辑页面
   goToEdit() {
     const guest = this.data.selectedGuest;
+    this.isPreviewingAvatar = false; // 编辑页回来需要刷新
     wx.navigateTo({
       url: `/pages/edit/index?id=${guest._id}`,
     });
     this.hideGuestActions();
+  },
+
+  // 预览头像大图
+  previewAvatar(e) {
+    const avatarUrl = e.currentTarget.dataset.avatar;
+    if (!avatarUrl) {
+      return;
+    }
+    this.isPreviewingAvatar = true;
+    wx.previewImage({
+      urls: [avatarUrl],
+      current: avatarUrl,
+    });
   },
 
   // 光临次数-1

@@ -81,11 +81,29 @@ Page({
           sourceType: sourceType,
           success: (chooseRes) => {
             const tempFilePath = chooseRes.tempFilePaths[0];
-            this.setData({
-              tempAvatarPath: tempFilePath,
+            // 裁剪成正方形
+            this.cropImage(tempFilePath, (croppedPath) => {
+              this.setData({
+                tempAvatarPath: croppedPath,
+              });
             });
           },
         });
+      },
+    });
+  },
+
+  // 裁剪图片为正方形
+  cropImage(filePath, callback) {
+    wx.cropImage({
+      src: filePath,
+      cropScale: "1:1",
+      success: (res) => {
+        callback(res.tempFilePath);
+      },
+      fail: (err) => {
+        console.log("裁剪失败，使用原图", err);
+        callback(filePath);
       },
     });
   },

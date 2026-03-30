@@ -114,4 +114,16 @@ Page({
     }
     return 0;
   },
+
+  // 预览头像大图
+  previewAvatar(e) {
+    const avatarUrl = e.currentTarget.dataset.avatar;
+    if (!avatarUrl) {
+      return;
+    }
+    wx.previewImage({
+      urls: [avatarUrl],
+      current: avatarUrl,
+    });
+  },
 });

@@ -17,7 +17,7 @@
     </view>
 
     <view wx:for="{{guestList}}" wx:key="_id" class="guest-item" bindtap="showGuestActions" data-guest="{{item}}">
-      <image class="guest-avatar" src="{{item.avatarUrl || '/images/avatar.png'}}" mode="aspectFill" />
+      <image class="guest-avatar" src="{{item.avatarUrl || '/images/avatar.png'}}" mode="aspectFill" catchtap="previewAvatar" data-avatar="{{item.avatarUrl}}" />
       <view class="guest-left">
         <view class="guest-name">
           {{item.name}}
