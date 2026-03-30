@@ -7,11 +7,11 @@ Page({
     guestList: [],
     showAdd: false,
     showActions: false,
-    showEditName: false,
     newGuestName: "",
-    editName: "",
     selectedGuest: null,
     searchKeyword: "",
+    tempAddAvatarPath: "",
+    adding: false,
   },
 
   onLoad() {
@@ -82,6 +82,7 @@ Page({
     this.setData({
       showAdd: true,
       newGuestName: "",
+      tempAddAvatarPath: "",
     });
   },
 
@@ -90,7 +91,47 @@ Page({
     this.setData({
       showAdd: false,
       newGuestName: "",
+      tempAddAvatarPath: "",
     });
+  },
+
+  // 选择添加客人的头像
+  chooseAddAvatar() {
+    wx.showActionSheet({
+      itemList: ["拍照", "从相册选择"],
+      success: (res) => {
+        const sourceType = res.tapIndex === 0 ? ["camera"] : ["album"];
+        wx.chooseImage({
+          count: 1,
+          sizeType: ["compressed"],
+          sourceType: sourceType,
+          success: (chooseRes) => {
+            const tempFilePath = chooseRes.tempFilePaths[0];
+            this.setData({
+              tempAddAvatarPath: tempFilePath,
+            });
+          },
+        });
+      },
+    });
+  },
+
+  // 上传图片到云存储
+  async uploadImage(filePath) {
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    const cloudPath = `avatars/${timestamp}_${random}.jpg`;
+
+    try {
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: filePath,
+      });
+      return uploadRes.fileID;
+    } catch (e) {
+      console.error("上传图片失败", e);
+      throw e;
+    }
   },
 
   // 输入客人姓名
@@ -153,20 +194,35 @@ Page({
   // 执行添加客人
   async doAddGuest(name) {
     try {
+      this.setData({ adding: true });
       wx.showLoading({ title: "添加中..." });
       const db = app.db;
+
+      // 如果有头像，先上传
+      let avatarUrl = "";
+      if (this.data.tempAddAvatarPath) {
+        avatarUrl = await this.uploadImage(this.data.tempAddAvatarPath);
+      }
+
+      const guestData = {
+        name: name,
+        currentCount: 0,
+        totalCount: 0,
+        rewardCount: 0,
+        visitHistory: [], // 每次光临时间记录
+        rewardHistory: [], // 每次奖励发放时间记录
+        createTime: db.serverDate(),
+        updateTime: db.serverDate(),
+      };
+
+      if (avatarUrl) {
+        guestData.avatarUrl = avatarUrl;
+      }
+
       await db.collection(DB_NAME).add({
-        data: {
-          name: name,
-          currentCount: 0,
-          totalCount: 0,
-          rewardCount: 0,
-          visitHistory: [], // 每次光临时间记录
-          rewardHistory: [], // 每次奖励发放时间记录
-          createTime: db.serverDate(),
-          updateTime: db.serverDate(),
-        },
+        data: guestData,
       });
+
       wx.showToast({
         title: "添加成功",
         icon: "success",
@@ -180,6 +236,7 @@ Page({
         icon: "none",
       });
     } finally {
+      this.setData({ adding: false });
       wx.hideLoading();
     }
   },
@@ -197,130 +254,8 @@ Page({
   hideGuestActions() {
     this.setData({
       showActions: false,
-      showEditName: false,
       selectedGuest: null,
-      editName: "",
     });
-  },
-
-  // 显示修改姓名弹窗
-  showEditNameModal() {
-    console.log("selectedGuest", this.data.selectedGuest);
-    this.setData({
-      showEditName: true,
-      editName: this.data.selectedGuest.name,
-    });
-  },
-
-  // 隐藏修改姓名弹窗
-  hideEditNameModal() {
-    this.setData({
-      showEditName: false,
-      editName: "",
-    });
-  },
-
-  // 输入新姓名
-  onEditNameInput(e) {
-    this.setData({
-      editName: e.detail.value,
-    });
-  },
-
-  // 保存修改姓名
-  async saveEditName() {
-    const newName = this.data.editName.trim();
-    if (!newName) {
-      wx.showToast({
-        title: "请输入客人姓名",
-        icon: "none",
-      });
-      return;
-    }
-
-    const guest = this.data.selectedGuest;
-    if (newName === guest.name) {
-      this.hideEditNameModal();
-      return;
-    }
-
-    try {
-      wx.showLoading({ title: "保存中..." });
-      const db = app.db;
-
-      // 检查是否有重名（排除自己）
-      const existRes = await db.collection(DB_NAME)
-        .where({
-          name: newName,
-          deleted: db.command.neq(true),
-        })
-        .get();
-
-      const hasDuplicate = existRes.data && existRes.data.some(item => item._id !== guest._id);
-
-      wx.hideLoading();
-
-      if (hasDuplicate) {
-        wx.showModal({
-          title: "客人已存在",
-          content: `客人「${newName}」已存在，确定还要修改吗？`,
-          success: async (res) => {
-            if (res.confirm) {
-              await this.doUpdateName(guest._id, newName);
-            }
-          },
-        });
-      } else {
-        await this.doUpdateName(guest._id, newName);
-      }
-    } catch (e) {
-      console.error("修改姓名失败", e);
-      wx.hideLoading();
-      wx.showToast({
-        title: "操作失败: " + (e.errMsg || e.message),
-        icon: "none",
-      });
-    }
-  },
-
-  // 执行更新姓名
-  async doUpdateName(guestId, newName) {
-    try {
-      wx.showLoading({ title: "保存中..." });
-      const db = app.db;
-
-      // 直接 update name 字段
-      const result = await db.collection(DB_NAME).doc(guestId).update({
-        data: {
-          name: newName,
-        },
-      });
-      console.log("更新结果", result);
-      wx.hideLoading();
-
-      if (result.stats.updated === 0) {
-        wx.showToast({
-          title: "未更新任何数据",
-          icon: "none",
-        });
-        return;
-      }
-
-      wx.showToast({
-        title: "修改成功",
-        icon: "success",
-      });
-      this.hideEditNameModal();
-      this.hideGuestActions();
-      this.loadGuests();
-    } catch (e) {
-      console.error("修改姓名失败", e);
-      wx.hideLoading();
-      wx.showToast({
-        title: "修改失败: " + (e.errMsg || e.message),
-        icon: "none",
-      });
-    }
   },
 
   // 跳转到详情页
@@ -328,6 +263,15 @@ Page({
     const guest = this.data.selectedGuest;
     wx.navigateTo({
       url: `/pages/detail/index?id=${guest._id}`,
+    });
+    this.hideGuestActions();
+  },
+
+  // 跳转到编辑页面
+  goToEdit() {
+    const guest = this.data.selectedGuest;
+    wx.navigateTo({
+      url: `/pages/edit/index?id=${guest._id}`,
     });
     this.hideGuestActions();
   },

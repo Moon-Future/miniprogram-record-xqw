@@ -77,6 +77,15 @@ page {
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
+.guest-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #e5e5e5;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
 .guest-left {
   flex: 1;
 }
@@ -261,6 +270,53 @@ page {
 
 .modal-input:focus {
   border-color: #1989fa;
+}
+
+/* 添加客人弹窗头像 */
+.add-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.add-avatar-wrapper {
+  position: relative;
+  width: 140rpx;
+  height: 140rpx;
+  margin-bottom: 16rpx;
+}
+
+.add-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  background: #e5e5e5;
+}
+
+.add-avatar-edit-badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 48rpx;
+  height: 48rpx;
+  background: linear-gradient(135deg, #1989fa 0%, #0c7cd5 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3rpx solid white;
+  box-shadow: 0 2rpx 8rpx rgba(25, 137, 250, 0.3);
+}
+
+.add-camera-icon {
+  font-size: 24rpx;
+  line-height: 1;
+}
+
+.add-avatar-tip {
+  font-size: 24rpx;
+  color: #999;
 }
 
 .modal-buttons {

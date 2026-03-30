@@ -2,6 +2,7 @@
 <view class="container">
   <!-- 客人信息头部 -->
   <view class="header">
+    <image class="detail-avatar" src="{{guest.avatarUrl || '/images/avatar.png'}}" mode="aspectFill" />
     <view class="guest-name">{{guest.name}}</view>
     <view class="guest-summary">
       <view class="summary-item">

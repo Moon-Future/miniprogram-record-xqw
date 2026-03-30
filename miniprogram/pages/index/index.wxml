@@ -17,6 +17,7 @@
     </view>
 
     <view wx:for="{{guestList}}" wx:key="_id" class="guest-item" bindtap="showGuestActions" data-guest="{{item}}">
+      <image class="guest-avatar" src="{{item.avatarUrl || '/images/avatar.png'}}" mode="aspectFill" />
       <view class="guest-left">
         <view class="guest-name">
           {{item.name}}
@@ -58,10 +59,26 @@
   <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddModal">
     <view class="modal-content" catchtap="stopPropagation">
       <view class="modal-title">添加新客人</view>
+      <!-- 头像选择 -->
+      <view class="add-avatar-section">
+        <view class="add-avatar-wrapper" bindtap="chooseAddAvatar">
+          <image
+            class="add-avatar"
+            src="{{tempAddAvatarPath || '/images/avatar.png'}}"
+            mode="aspectFill"
+          />
+          <view class="add-avatar-edit-badge">
+            <text class="add-camera-icon">📷</text>
+          </view>
+        </view>
+        <text class="add-avatar-tip">点击添加头像</text>
+      </view>
       <input class="modal-input" placeholder="请输入客人姓名" value="{{newGuestName}}" bindinput="onNameInput" />
       <view class="modal-buttons">
         <button class="modal-btn cancel" bindtap="hideAddModal">取消</button>
-        <button class="modal-btn confirm" bindtap="addGuest">确定</button>
+        <button class="modal-btn confirm" bindtap="addGuest" disabled="{{adding}}">
+          {{adding ? '添加中...' : '确定'}}
+        </button>
       </view>
     </view>
   </view>
@@ -102,25 +119,13 @@
       <!-- 查看详情按钮 -->
       <button class="detail-btn" bindtap="goToDetail">查看完整记录</button>
 
-      <!-- 修改姓名按钮 -->
-      <button class="detail-btn" bindtap="showEditNameModal">修改姓名</button>
+      <!-- 修改客人信息按钮 -->
+      <button class="detail-btn" bindtap="goToEdit">修改客人信息</button>
 
       <!-- 删除按钮 -->
       <button class="delete-btn" bindtap="deleteGuest">删除客人</button>
 
       <button class="close-btn" bindtap="hideGuestActions">关闭</button>
-    </view>
-  </view>
-
-  <!-- 修改姓名弹窗 -->
-  <view wx:if="{{showEditName}}" class="modal-mask" bindtap="hideEditNameModal">
-    <view class="modal-content" catchtap="stopPropagation">
-      <view class="modal-title">修改客人姓名</view>
-      <input class="modal-input" placeholder="请输入新的客人姓名" value="{{editName}}" bindinput="onEditNameInput" />
-      <view class="modal-buttons">
-        <button class="modal-btn cancel" bindtap="hideEditNameModal">取消</button>
-        <button class="modal-btn confirm" bindtap="saveEditName">确定</button>
-      </view>
     </view>
   </view>
 </view>

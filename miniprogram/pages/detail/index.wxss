@@ -12,6 +12,18 @@ page {
   background: linear-gradient(135deg, #1989fa 0%, #0c7cd5 100%);
   padding: 40rpx 30rpx;
   color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.detail-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  margin-bottom: 20rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.5);
 }
 
 .guest-name {

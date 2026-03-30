@@ -1,0 +1,38 @@
+<view class="container">
+  <!-- 头像区域 -->
+  <view class="avatar-section">
+    <view class="avatar-wrapper" bindtap="chooseAvatar">
+      <image
+        class="avatar"
+        src="{{tempAvatarPath || avatarUrl || '/images/avatar.png'}}"
+        mode="aspectFill"
+      />
+      <view class="avatar-edit-badge">
+        <text class="camera-icon">📷</text>
+      </view>
+    </view>
+    <text class="avatar-tip">点击更换头像</text>
+  </view>
+
+  <!-- 姓名输入 -->
+  <view class="form-section">
+    <view class="form-item">
+      <text class="form-label">客人姓名</text>
+      <input
+        class="form-input"
+        placeholder="请输入客人姓名"
+        value="{{name}}"
+        bindinput="onNameInput"
+        maxlength="20"
+      />
+    </view>
+  </view>
+
+  <!-- 按钮区域 -->
+  <view class="button-section">
+    <button class="btn cancel" bindtap="cancelEdit">取消</button>
+    <button class="btn confirm" bindtap="saveEdit" disabled="{{uploading}}">
+      {{uploading ? '上传中...' : '保存'}}
+    </button>
+  </view>
+</view>
