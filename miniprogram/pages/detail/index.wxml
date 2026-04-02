@@ -16,9 +16,41 @@
     </view>
   </view>
 
+  <!-- 操作按钮区 -->
+  <view class="action-bar">
+    <!-- 非编辑模式 -->
+    <view wx:if="{{!isEditing}}" class="action-buttons">
+      <button class="action-btn edit-btn" bindtap="enterEditMode">选择删除</button>
+      <button class="action-btn add-btn" bindtap="showAddBatchModal">批量增加</button>
+      <button class="action-btn reward-btn" bindtap="giveReward">发放奖励</button>
+    </view>
+
+    <!-- 编辑模式 -->
+    <view wx:if="{{isEditing}}" class="action-buttons">
+      <button class="action-btn cancel-btn" bindtap="exitEditMode">取消</button>
+      <button class="action-btn delete-btn" bindtap="batchDeleteVisits" disabled="{{selectedRecords.length === 0}}">删除选中({{selectedRecords.length}})</button>
+    </view>
+  </view>
+
   <!-- 记录列表 -->
   <view class="record-list">
-    <view wx:for="{{recordList}}" wx:key="index" class="record-item {{item.type === 'reward' ? 'reward' : ''}}">
+    <!-- 编辑模式时显示全选 -->
+    <view wx:if="{{isEditing && recordList.length > 0}}" class="select-all-bar" bindtap="toggleSelectAll">
+      <view class="checkbox {{isAllSelected ? 'checked' : ''}}">
+        <text wx:if="{{isAllSelected}}">✓</text>
+      </view>
+      <text class="select-all-text">全选光临记录</text>
+      <text class="select-tip">(奖励记录可单独选择)</text>
+    </view>
+
+    <view wx:for="{{recordList}}" wx:key="index" class="record-item {{item.type === 'reward' ? 'reward' : ''}} {{isEditing ? 'editable' : ''}}" bindtap="{{isEditing ? 'toggleRecordSelect' : ''}}" data-index="{{index}}">
+      <!-- 编辑模式时显示复选框 -->
+      <view wx:if="{{isEditing}}" class="record-checkbox">
+        <view class="checkbox {{item.selected ? 'checked' : ''}}">
+          <text wx:if="{{item.selected}}">✓</text>
+        </view>
+      </view>
+
       <view class="record-icon">
         <text wx:if="{{item.type === 'visit'}}">👋</text>
         <text wx:if="{{item.type === 'reward'}}">🎁</text>

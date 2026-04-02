@@ -57,6 +57,108 @@ page {
   color: #ffe066;
 }
 
+/* 操作按钮区 */
+.action-bar {
+  padding: 20rpx;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 70rpx;
+  line-height: 70rpx;
+  border-radius: 35rpx;
+  font-size: 26rpx;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.edit-btn {
+  background: linear-gradient(135deg, #1989fa 0%, #0c7cd5 100%);
+  color: white;
+}
+
+.add-btn {
+  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  color: white;
+}
+
+.reward-btn {
+  background: linear-gradient(135deg, #ff976a 0%, #ff6b35 100%);
+  color: white;
+}
+
+.cancel-btn {
+  background: linear-gradient(135deg, #909399 0%, #787b80 100%);
+  color: white;
+}
+
+.delete-btn {
+  background: #ff4d4f;
+  color: white;
+}
+
+.delete-btn[disabled] {
+  background: #ccc;
+  color: #999;
+}
+
+/* 全选栏 */
+.select-all-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 16rpx;
+  padding: 20rpx 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.select-all-text {
+  font-size: 28rpx;
+  color: #333;
+  margin-left: 20rpx;
+}
+
+.select-tip {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: auto;
+}
+
+/* 复选框 */
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: white;
+  flex-shrink: 0;
+}
+
+.checkbox.checked {
+  background: #1989fa;
+  border-color: #1989fa;
+}
+
+.checkbox.disabled {
+  background: #f5f5f5;
+  border-color: #eee;
+}
+
 /* 记录列表 */
 .record-list {
   padding: 20rpx;
@@ -70,6 +172,18 @@ page {
   padding: 28rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.record-item.editable {
+  cursor: pointer;
+}
+
+.record-item.editable:active {
+  background: #f5f5f5;
+}
+
+.record-checkbox {
+  margin-right: 20rpx;
 }
 
 .record-item.reward {
